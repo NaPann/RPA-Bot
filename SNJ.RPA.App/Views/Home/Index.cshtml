@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Request";
+}
+
+<form method="post" id="myForm">
+<div class="text-center">
+    <h1 class="display-6">Please entry Product Name</h1>
+   <input type="text" class="form-control text-center" id="txtDATA" placeholder="Data Request ..." />
+        <input type="email" class="form-control text-center" id="txtEMAIL" placeholder="Requestor Email  ..." />
+   <button type="submit" class="btn btn-success mt-2">Request</button>
+</div>
+</form>
+
+@section Scripts {
+<script>
+
+        $(document).ready(function () {
+            console.log("ready!");
+           
+            $("#myForm").on("submit", function (e) {
+                e.preventDefault();
+                let _data = $("#txtDATA").val(), _email = $("#txtEMAIL").val();
+                if (_data == "" || _email == "") {
+                    alert('Required all data !!');
+                    return false;
+                }
+
+                $('body').loading({
+                    // stoppable: true
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: "/Home/CallServices",
+                    dataType: "json",
+                    data: { data_request: _data, email: _email },
+                    success: function (data) {
+                        $('body').loading('stop');
+                        if (data.status == "ok") {
+                            alert("Successful");
+                        } else {
+                            alert("Err : " + data.message);
+                        }
+                    },
+                    error: function () {
+                          $('body').loading('stop');
+                        alert('error');
+                    }
+
+                });
+            });
+        });
+   
+</script>
+}
