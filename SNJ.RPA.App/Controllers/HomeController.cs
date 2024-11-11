@@ -74,6 +74,8 @@ namespace SNJ.RPA.App.Controllers
                     List<IWebElement> lstTdElem = new List<IWebElement>(row.FindElements(By.TagName("td")));
                     if (lstTdElem.Count > 0)
                     {
+                        // IList<IWebElement> links = lstTdElem[19].FindElements(By.TagName("a"));
+                        // links.First().Click();
                         _data.Add(new TableData()
                         {
                             doc_no = lstTdElem[2].Text.Trim(),
@@ -85,7 +87,20 @@ namespace SNJ.RPA.App.Controllers
                     }
                 }
 
-                //Email
+                //more detail
+                foreach (var item in _data)
+                {
+                    driver.Navigate().GoToUrl("https://pertento.fda.moph.go.th/FDA_SEARCH_CENTER/PRODUCT/export_cmt_detail.aspx?regnos=" + item.doc_no.Replace("-",""));
+                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(200); Thread.Sleep(1000);
+
+                    item.date_register = driver.FindElement(By.Id("ContentPlaceHolder1_lb_appdate")).Text.Trim();
+                    item.date_expire = driver.FindElement(By.Id("ContentPlaceHolder1_lb_expdate")).Text.Trim();
+                    item.address = driver.FindElement(By.Id("ContentPlaceHolder1_lb_locat_pop")).Text.Trim();
+
+                }
+
+
+                // //Email
                 string[] _mailTo = email.Split('\u002C');
                 string _body = "As Your Request Data:<br>";
                 //Column
@@ -94,6 +109,9 @@ namespace SNJ.RPA.App.Controllers
                     $"<th style='border: 1px solid #ddd;padding: 8px;'>Company</th>" +
                     $"<th style='border: 1px solid #ddd;padding: 8px;'>Trade Name</th>" +
                     $"<th style='border: 1px solid #ddd;padding: 8px;'>Product</th>" +
+                     $"<th style='border: 1px solid #ddd;padding: 8px;'>Date Registerd</th>" +
+                      $"<th style='border: 1px solid #ddd;padding: 8px;'>Date Expired</th>" +
+                       $"<th style='border: 1px solid #ddd;padding: 8px;'>Address</th>" +
                     $"<th style='border: 1px solid #ddd;padding: 8px;'>Status</th></tr></thead>";
                 foreach (var _d in _data)
                 {
@@ -102,7 +120,10 @@ namespace SNJ.RPA.App.Controllers
                                             $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.company}</td>" +
                                               $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.trade}</td>" +
                                                 $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.product}</td>" +
-                                                  $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.status}</td>" +
+                                                  $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.date_register}</td>" +
+                                                     $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.date_expire}</td>" +
+                                                        $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.address}</td>" +
+                                                           $"<td style='border: 1px solid #ddd;padding: 8px;'>{_d.status}</td>" +
                                              $"</tr>";
                 }
                 var message = new Message(_mailTo, "SNJ-RPA", _body);
@@ -163,6 +184,9 @@ namespace SNJ.RPA.App.Controllers
         public string trade { get; set; }
         public string product { get; set; }
         public string status { get; set; }
+        public string? date_register { get; set; }
+        public string? date_expire { get; set; }
+        public string? address { get; set; }
     }
 
 }
